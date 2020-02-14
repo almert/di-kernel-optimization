@@ -13,11 +13,11 @@ from nystrom import Nystrom
 
 class TFClassifier(BaseEstimator):
     '''
-    TFClassifier implements a linear predictor for classification tasks, and uses Tensorflow libraries to train 
+    TFClassifier implements a linear predictor for classification tasks and uses Tensorflow libraries to train 
     the predictor via stochastic gradient methods.
     
     Arguments:
-    loss: (string) The type of loss function to be minimized by the predictor. Currently, "hinge", "squared_hinge",
+    loss: (string) The type of loss function to be minimized by the predictor. Currently "hinge", "squared_hinge",
     'logistic' and 'squared' losses are supported.
     alpha: (float) The l_2 penalty to be applied to the predictor weights.
     epoch_lim: (int) The maximum number of epochs to train the predictor.
@@ -138,7 +138,7 @@ class TFClassifier(BaseEstimator):
         
 class TFNystromClassifier(BaseEstimator):
     '''
-    TFNystromClassifier implements a kernel based predictor for classification tasks, and uses Tensorflow libraries to 
+    TFNystromClassifier implements a kernel based predictor for classification tasks and uses Tensorflow libraries to 
     train the predictor via stochastic gradient methods.
     
     Arguments:
