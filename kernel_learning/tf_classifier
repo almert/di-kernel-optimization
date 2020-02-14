@@ -15,11 +15,22 @@ from sklearn.metrics import pairwise
 from nystrom import Nystrom
 
 class TFClassifier(BaseEstimator):
+    '''
+    TFClassifier implements a linear predictor for classification tasks, and uses Tensorflow libraries to train 
+    the predictor via stochastic gradient methods.
+    
+    Arguments:
+    loss: (string) The type of loss function to be minimized by the predictor. Currently, "hinge", "squared_hinge",
+    'logistic' and 'squared' losses are supported.
+    alpha: (float) The l_2 penalty to be applied to the predictor weights.
+    epoch_lim: (int) The maximum number of epochs to train the predictor.
+    optimizer: (string or object) The name of the gradient based optimizer ("SGD" or "Adam") or an object from
+    tensorflow.train.
+    '''
     
     def __init__(self,loss='squared_hinge',alpha=1e-4,epoch_lim=250,optimizer='Adam'):
         
         assert loss in ['hinge','squared_hinge','logistic','squared']
-        assert optimizer in ['SGD','Adam']
         assert isinstance(alpha,Number) and alpha >= 0
         assert isinstance(epoch_lim,int) or np.issubdtype(epoch_lim, np.integer) 
         self.loss = loss
@@ -28,6 +39,16 @@ class TFClassifier(BaseEstimator):
         self.epoch_lim = epoch_lim
         
     def fit(self,X,y,batch_size=100,patience=10,lr_patience=5,verbose=False):
+        '''
+        Arguments:
+        X: (array) The training data, must have two dimensions.
+        y: (array) The training labels, must be one-hot encoded with two dimensions. To produce training labels in 
+        this format, one might use sklearn.preprocessing.LabelBinarizer.
+        batch_size: (int) The mini-batch size for computing the stochastic gradients.
+        patience: (int) Number of epochs without a decrease in average loss before training is stopped.
+        lr_patience: (int) Number of epochs without a decrease in average loss before learning rate is reduced.
+        verbose: (bool) Whether to print out update messages during predictor training.
+        '''
         
         x_in = tf.placeholder(tf.float64,shape=[None,X.shape[1]])
         y_in = tf.placeholder(tf.float64,shape=[None,y.shape[1]])
@@ -58,9 +79,12 @@ class TFClassifier(BaseEstimator):
             
         if self.optimizer == 'SGD':
             train_step = tf.train.GradientDescentOptimizer(lr).minimize(loss_func,var_list=[W,b]);
-            lr_now = 0.1;
+            lr_now = 0.01;
         elif self.optimizer == 'Adam':
             train_step = tf.train.AdamOptimizer(lr).minimize(loss_func,var_list=[W,b]);
+            lr_now = 0.001;
+        else:
+            train_step = self.optimizer(lr).minimize(loss_func,var_list=[W,b]);
             lr_now = 0.001;
                             
         sess = tf.Session();
@@ -116,6 +140,28 @@ class TFClassifier(BaseEstimator):
             
         
 class TFNystromClassifier(BaseEstimator):
+    '''
+    TFNystromClassifier implements a kernel based predictor for classification tasks, and uses Tensorflow libraries to 
+    train the predictor via stochastic gradient methods.
+    
+    Arguments:
+    kernel: (string) The type of kernel to be used. Currently 'linear', 'poly', 'rbf', 'laplacian', 'chi2', 
+    'additive_chi2' and 'sigmoid' are supported.
+    gamma: (float) The scale parameter for the kernel. Equals 1/sqrt(2*bandwidth**2) for kernels with a bandwidth parameter.
+    degree: (float) The degree for polynomial kernels.
+    coef0: (float) An additive parameter for 'poly' and 'sigmoid' kernels.
+    n: (int) Number of random data samples used to produce a Nystrom approximation. If n=len(X), no approximation takes place and the
+    full-dimensional kernel is used.
+    k: (int) Number of subspace dimensions used. If k=n, the full kernel feature space is used to train the predictor.
+    rand_svd: (bool) Whether to use randomized SVD to obtain the Nystrom kernel approximation.
+    loss: (string) The type of loss function to be minimized by the predictor. Currently, "hinge", "squared_hinge",
+    'logistic' and 'squared' losses are supported.
+    alpha: (float) The l_2 penalty to be applied to the predictor weights.
+    epoch_lim: (int) The maximum number of epochs to train the predictor.
+    optimizer: (string or object) The name of the gradient based optimizer ("SGD" or "Adam") or an object from
+    tensorflow.train.
+    '''    
+    
     def __init__(self,kernel='rbf',gamma=1.,degree=3,coef0=1.,n=1000,k=None,
                  rand_svd=False,loss='squared_hinge',alpha=1.,optimizer='Adam'):
         self.kernel = kernel;
@@ -130,6 +176,14 @@ class TFNystromClassifier(BaseEstimator):
         self.optimizer = optimizer;
         
     def fit(self,X,y,batch_size=100):
+        '''
+        Arguments:
+        X: (array) The training data, must have two dimensions.
+        y: (array) The training labels, must be one-hot encoded with two dimensions. To produce training labels in 
+        this format, one might use sklearn.preprocessing.LabelBinarizer.
+        batch_size: (int) The mini-batch size for computing the stochastic gradients.
+        '''
+        
         mapper = Nystrom(kernel=self.kernel,gamma=self.gamma,degree=self.degree,
                          coef0=self.coef0,n=self.n,k=self.k,rand_svd=self.rand_svd);
         mapper.fit(X);
