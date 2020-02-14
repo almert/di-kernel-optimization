@@ -30,9 +30,9 @@ BibTeX format:
                Zejiang Hou and
                Sun-Yuan Kung},
   booktitle = {Proc.~IEEE International Conference on Acoustics, Speech, and Signal Processing},
-  year = {2020},
-  month = {May},
+  year      = {2020},
+  month     = {May},
   organization = {IEEE}
-  url = {https://arxiv.org/abs/1909.10432},
+  url       = {https://arxiv.org/abs/1909.10432},
 }
 ```
