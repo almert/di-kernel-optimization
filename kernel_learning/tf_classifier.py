@@ -167,7 +167,8 @@ class TFNystromClassifier(BaseEstimator):
     n: (int) Number of random data samples used to produce a Nystrom approximation. If n=len(X), no approximation takes place
     and the full-dimensional kernel mapping is used.
     k: (int) Number of subspace dimensions used. If k=n, the full kernel feature space is used to train the predictor.
-    rand_svd: (bool) Whether to use randomized SVD to obtain the Nystrom kernel approximation.
+    rand_svd: (bool) Whether to use randomized SVD to obtain the Nystrom kernel approximation. Can produce speed up when k is
+    much smaller than n.
     loss: (string) The type of loss function to be minimized by the predictor. Currently, "hinge", "squared_hinge",
     'logistic' and 'squared' losses are supported.
     alpha: (float) The l_2 penalty to be applied to the predictor weights.
