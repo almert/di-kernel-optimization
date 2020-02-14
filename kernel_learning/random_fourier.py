@@ -26,8 +26,7 @@ class RandomFourier(BaseEstimator):
         
     def fit(self,X):
         '''
-        Arguments: 
-        
+        Arguments:  
         X: The training data, only the number of columns is used to produce the kernel mapping.
         '''
         
