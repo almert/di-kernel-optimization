@@ -13,8 +13,7 @@ class RandomFourier(BaseEstimator):
     RandomFourier approximates a kernel mapping using the methodology introduced in Rahimi and Recht [1].
     [1] https://people.eecs.berkeley.edu/~brecht/papers/07.rah.rec.nips.pdf
     
-    Arguments:
-    
+    Arguments: 
     n: (int) The dimensionality of the kernel feature map.
     kernel: (string) The type of kernel to be used. Only 'rbf' and 'laplacian' are supported.
     gamma: (float) The scale parameter of the kernel. Equals 1/sqrt(2 bandwidth^2).
