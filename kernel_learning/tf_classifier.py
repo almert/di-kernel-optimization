@@ -161,7 +161,7 @@ class TFNystromClassifier(BaseEstimator):
     Arguments:
     kernel: (string) The type of kernel to be used. Currently 'linear', 'poly', 'rbf', 'laplacian', 'chi2', 
     'additive_chi2' and 'sigmoid' are supported.
-    gamma: (float) The scale parameter for the kernel. Equals 1/sqrt(2 bandwidth^2) for kernels with a bandwidth parameter.
+    gamma: (float) The scale parameter of the kernel. Equals 1/sqrt(2 bandwidth^2) for kernels with a bandwidth parameter.
     degree: (float) The degree for polynomial kernels.
     coef0: (float) An additive parameter for 'poly' and 'sigmoid' kernels.
     n: (int) Number of random data samples used to produce a Nystrom approximation. If n=len(X), no approximation takes place
