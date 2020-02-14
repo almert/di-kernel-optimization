@@ -47,8 +47,7 @@ class KernelLayer():
         
     def initialize(self,Xtr,dtype=tf.float64,x_trainable=True,w_trainable=True):
         '''
-        Arguments:
-        
+        Arguments:   
         Xtr: (array) The training data from which n landmark samples are selected to create a kernel mapping.
         dtype: (object) The tensorflow data type.
         x_trainable: (bool) Whether the landmark samples trainable or not.
@@ -107,8 +106,7 @@ class SubspaceKDI():
             
     def initialize(self,Xtr,dtype=tf.float64,x_trainable=True):
         '''
-        Arguments:
-        
+        Arguments:        
         X: (array) The training data from which n landmark samples are selected to initialize the kernel mapping.
         dtype: (object) The tensorflow data type.
         x_trainable: (bool) Whether the landmark samples trainable or not. Set to True in order to optimize the 
@@ -186,8 +184,7 @@ class RandomFourierLayer():
     def initialize(self,Xtr,dtype=tf.float64,W_init=None,b_init=None,
                    w_trainable=True,b_trainable=True):
                 '''
-        Arguments:
-        
+        Arguments: 
         Xtr: (array) The training data, only the number of columns is used to produce the kernel mapping.
         dtype: (object) The tensorflow data type.
         W_init: (array) The initial value of the projection matrix. If None, initialization is done randomly 
