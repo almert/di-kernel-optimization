@@ -29,8 +29,10 @@ BibTeX format:
   author    = {Mert Al and
                Zejiang Hou and
                Sun-Yuan Kung},
-  volume    = {abs/1909.10432},
-  year      = {2020},
-  url       = {https://arxiv.org/abs/1909.10432},
+  booktitle = {Proc.~IEEE International Conference on Acoustics, Speech, and Signal Processing},
+  year = {2020},
+  month = {May},
+  organization = {IEEE}
+  url = {https://arxiv.org/abs/1909.10432},
 }
 ```
