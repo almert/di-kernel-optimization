@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Feb 13 13:56:17 2019
-
-@author: merta
+@author: almert
 """
 
 import sys
@@ -18,6 +16,15 @@ from sklearn.metrics import pairwise
 
 
 class KernelLayer():
+    '''
+    KernelLayer produces a tensorflow compatible kernel mapping by performing a Nystrom approximation.
+    
+    Arguments:
+    n: (int) The number of samples to be selected in random to produce the Nystrom approximation.
+    k: (int) The output dimensionality of the kernel feature map.
+    kernel: (string) The type of kernel to be used. Currently, only 'rbf' and 'laplacian' are supported.
+    gamma: (float) The scale parameter of the kernel. Equals 1/sqrt(2 bandwidth^2).
+    '''
     
     def __init__(self,n=1024,k=None,kernel='rbf',gamma=0.01):
         
@@ -39,6 +46,14 @@ class KernelLayer():
             self.kernel_func = tf_kernel.LaplacianKernel(1./self.gamma)
         
     def initialize(self,Xtr,dtype=tf.float64,x_trainable=True,w_trainable=True):
+        '''
+        Arguments:
+        
+        Xtr: (array) The training data from which n landmark samples are selected to create a kernel mapping.
+        dtype: (object) The tensorflow data type.
+        x_trainable: (bool) Whether the landmark samples trainable or not.
+        w_trainable: (bool) Whether the projection matrix is trainable or not.
+        '''
         
         assert isinstance(Xtr, np.ndarray) and Xtr.ndim == 2
         assert isinstance(x_trainable,bool) and isinstance(w_trainable,bool)
@@ -51,11 +66,30 @@ class KernelLayer():
         self.W_rep = tf.Variable(mapper.A,dtype=dtype,trainable=w_trainable)
         
     def layer_func(self,X):
+        '''
+        Arguments:
+        X: (2d tensor) The data to apply the kernel mapping to.
+        
+        Returns:
+        A tensor representing the kernel mapping applied to X.
+        '''
+        
         return tf.matmul(self.kernel_func(X, self.X_rep),self.W_rep)
 
 
 class SubspaceKDI():
-
+    '''
+    SubspaceKDI produces a tensorflow compatible kernel mapping and produces the Kernel Discriminant Information (KDI)
+    metric for evaluating/optimizing the kernel mapping.
+    
+    Arguments:
+    n: (int) The number of samples to be selected in random to produce the Nystrom approximation.
+    k: (int) The output dimensionality of the kernel feature map.
+    kernel: (string) The type of kernel to be used. Currently, only 'rbf' and 'laplacian' are supported.
+    gamma: (float) The scale parameter of the kernel. Equals 1/sqrt(2 bandwidth^2).
+    rho: (float) The ridge regularizer to be used in the KDI objective.
+    '''
+    
     def __init__(self,n=1024,kernel='rbf',gamma=0.01,rho=1e-4):
         assert (isinstance(n,int) or np.issubdtype(n, np.integer)) and n > 0
         assert kernel in ['rbf','laplacian']
@@ -72,6 +106,14 @@ class SubspaceKDI():
             self.kernel_func = tf_kernel.LaplacianKernel(1./self.gamma)
             
     def initialize(self,Xtr,dtype=tf.float64,x_trainable=True):
+        '''
+        Arguments:
+        
+        X: (array) The training data from which n landmark samples are selected to initialize the kernel mapping.
+        dtype: (object) The tensorflow data type.
+        x_trainable: (bool) Whether the landmark samples trainable or not. Set to True in order to optimize the 
+        kernel map via KDI.
+        '''
         
         assert isinstance(Xtr, np.ndarray) and Xtr.ndim == 2
         assert isinstance(x_trainable,bool)
@@ -81,9 +123,28 @@ class SubspaceKDI():
         self.K_rep = self.kernel_func(self.X_rep)
         
     def layer_func(self,X):
+        '''
+        Arguments:
+        X: (2d tensor) The data to apply the kernel mapping to.
+        
+        Returns:
+        A tensor representing the kernel mapping applied to X.
+        '''
+        
         return self.kernel_func(X, self.X_rep)
         
     def KDI(self,X,Y,normalize=False,epsilon=1e-10):
+        '''
+        Arguments:
+        X: (2d tensor) The data to compute the KDI with.
+        Y: (2d tensor) The training labels to compute KDI with.
+        normalize: (bool) Whether to scale the columns of Y to be unit norm. This makes KDI match Fisher's Discriminant
+        Analysis objective.
+        epsilon: (float) A small ridge regularizer added for numerical stability.
+        
+        Returns:
+        A tensorflow scalar representing the value of the KDI objective.
+        '''
         
         if normalize:
             Yn = Y/(tf.norm(Y,axis=0)+1e-10)
@@ -98,11 +159,20 @@ class SubspaceKDI():
         
         Kb_half = tf.matmul(Kbar,Yn,transpose_a=True)
         KinvKb = tf.linalg.solve(Kw,Kb_half)
-        objective = tf.trace(tf.matmul(Kb_half,KinvKb,transpose_a=True))
+        objective = tf.reduce_sum(Kb_half*KinvKb)
         return objective
         
 
 class RandomFourierLayer():
+    '''
+    RandomFourierLayer produces a tensorflow compatible kernel mapping by performing a Random Fourier approximation.
+    
+    Arguments:
+    n: (int) The dimensionality of the kernel feature map.
+    kernel: (string) The type of kernel to be used. Only 'rbf' and 'laplacian' are supported.
+    gamma: (float) The scale parameter of the kernel. Equals 1/sqrt(2 bandwidth^2).
+    '''
+
     
     def __init__(self,n=1024,kernel='rbf',gamma=0.01):
         
@@ -115,6 +185,18 @@ class RandomFourierLayer():
         
     def initialize(self,Xtr,dtype=tf.float64,W_init=None,b_init=None,
                    w_trainable=True,b_trainable=True):
+                '''
+        Arguments:
+        
+        Xtr: (array) The training data, only the number of columns is used to produce the kernel mapping.
+        dtype: (object) The tensorflow data type.
+        W_init: (array) The initial value of the projection matrix. If None, initialization is done randomly 
+        based on the chosen kernel.
+        b_init: (array) The initial value of the bias vector. If None, initialization is done randomly 
+        based on the chosen kernel.
+        w_trainable: (bool) Whether the projection matrix is trainable or not.
+        b_trainable: (bool) Whether the bias vector is trainable or not.
+        '''        
         
         assert isinstance(Xtr, np.ndarray) and Xtr.ndim == 2
         assert isinstance(w_trainable,bool) and isinstance(b_trainable,bool)
@@ -138,6 +220,14 @@ class RandomFourierLayer():
             self.b = tf.Variable(b_init,dtype=dtype,trainable=b_trainable)
                
     def layer_func(self,X):
+        '''
+        Arguments:
+        X: (2d tensor) The data to apply the kernel mapping to.
+        
+        Returns:
+        A tensor representing the kernel mapping applied to X.
+        '''
+        
         return np.sqrt(2./self.n)*tf.cos(tf.matmul(X,self.W)+self.b);
 
 
@@ -171,6 +261,20 @@ class LocalNystrom():
 
 
 def DI(X,Y,rho=1e-4,normalize=False):
+    '''
+    DI computes the linear Discriminant Information criterion on the data and labels. This can be applied to a non-linear 
+    mapping such as a Random Fourier layer to produce a supervised training objective.
+    
+    Arguments:
+    X: (2d tensor) The data to compute the DI with.
+    Y: (2d tensor) The training labels to compute DI with.
+    normalize: (bool) Whether to scale the columns of Y to be unit norm. This makes DI match Fisher's Discriminant
+    Analysis objective.
+    rho: The ridge regularizer used in the DI objective.
+        
+    Returns:
+    A tensorflow scalar representing the value of the DI objective.
+    '''
     
     if normalize:
         Yn = Y/(tf.norm(Y,axis=0)+1e-10)
@@ -182,7 +286,7 @@ def DI(X,Y,rho=1e-4,normalize=False):
     #S_inv = tf.matrix_inverse(Sbar)
     
     Sb_half = tf.matmul(Xbar,Yn,transpose_a=True)
-    objective = tf.trace(tf.matmul(Sb_half,tf.linalg.solve(Sbar,Sb_half),transpose_a=True))
+    objective = tf.reduce_sum(Sb_half*tf.linalg.solve(Sbar,Sb_half))
     return objective
     
 
