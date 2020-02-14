@@ -27,7 +27,7 @@ class TFClassifier(BaseEstimator):
         self.alpha = alpha
         self.epoch_lim = epoch_lim
         
-    def fit(self,X,y,batch_size=100,patience=10,lr_patience=5):
+    def fit(self,X,y,batch_size=100,patience=10,lr_patience=5,verbose=False):
         
         x_in = tf.placeholder(tf.float64,shape=[None,X.shape[1]])
         y_in = tf.placeholder(tf.float64,shape=[None,y.shape[1]])
@@ -79,14 +79,16 @@ class TFClassifier(BaseEstimator):
                 lval, _ = sess.run([loss_func,train_step],
                     feed_dict={x_in: X[b_inds], y_in: y[b_inds],lr: lr_now});
                 avg_loss = ((n_batch-1)*avg_loss + lval)/n_batch;
-                #print('\r'+'Batch %d: Average loss %f' %(n_batch,avg_loss),end='\r');       
+      
                 if end >= len(X):
                     break;
                 n_batch += 1;  
                 start = start+batch_size;
                 end = min(len(X),end+batch_size);
 
-            #print('Epoch %d with average loss %f'%(i,avg_loss));
+            if verbose:
+                print('Epoch %d with average loss %f'%(i,avg_loss));
+            
             if avg_loss < min_avg_loss:
                 min_avg_loss = avg_loss;
                 stop_cnt = 0;
@@ -115,7 +117,7 @@ class TFClassifier(BaseEstimator):
         
 class TFNystromClassifier(BaseEstimator):
     def __init__(self,kernel='rbf',gamma=1.,degree=3,coef0=1.,n=1000,k=None,
-                 rand_svd = False,loss='squared_hinge',alpha=1.,optimizer='Adam'):
+                 rand_svd=False,loss='squared_hinge',alpha=1.,optimizer='Adam'):
         self.kernel = kernel;
         self.gamma = gamma;
         self.degree= degree;
