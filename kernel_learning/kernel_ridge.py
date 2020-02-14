@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+@author: almert
+"""
 
 import numpy as np
 from scipy.linalg import solve, eigh
@@ -9,8 +12,20 @@ from sklearn.preprocessing import LabelBinarizer
 from sklearn.base import BaseEstimator
 
 class KernelRidgeClassifier(BaseEstimator):
+    '''
+    KernelRidgeClassifier produces a kernel predictor for multiclass classification by performing Kernel Ridgre Regression 
+    on an indicator matrix.
     
-    def __init__(self,rho=0.001,kernel='rbf',gamma=1.,degree=3,coef0=1.):
+    Arguments:
+    rho: (float) The value of the ridge regularizer.
+    kernel: (string) The type of kernel to be used. Currently 'linear', 'poly', 'rbf', 'laplacian', 'chi2', 
+    'additive_chi2' and 'sigmoid' are supported.
+    gamma: (float) The scale parameter of the kernel. Equals 1/sqrt(2 bandwidth^2) for kernels with a bandwidth parameter.
+    degree: (float) The degree for polynomial kernels.
+    coef0: (float) An additive parameter for 'poly' and 'sigmoid' kernels.
+    '''
+    
+    def __init__(self,rho=0.0001,kernel='rbf',gamma=1.,degree=3,coef0=1.):
         self.rho = rho;
         self.kernel = kernel;
         self.gamma = gamma;
@@ -18,6 +33,12 @@ class KernelRidgeClassifier(BaseEstimator):
         self.coef0 = coef0;
         
     def fit(self,X,y,solver='chol'):
+        '''
+        Arguments:
+        X: (array) The training data.
+        y: (array) The training labels.
+        '''
+        
         self.X = X;
         self.N = len(X);
         
@@ -45,6 +66,14 @@ class KernelRidgeClassifier(BaseEstimator):
         return self;
         
     def predict(self,X):
+        '''
+        Arguments:
+        X: (array) The data to perform predictions on.
+        
+        Returns:
+        An array storing the predicted class labels.
+        '''
+        
         K = get_kernel_matrix(X,self.X,self.kernel,self.gamma,self.degree,self.coef0)
         scores = np.dot(K,self.dual_coef_.T)+self.intercept_;
         if self.lb.y_type_ == 'binary':
@@ -53,11 +82,31 @@ class KernelRidgeClassifier(BaseEstimator):
             return self.lb.classes_[np.argmax(scores,axis=1)];
     
     def score(self,X,y):
+        '''
+        Arguments:
+        X: (array) The test data to perform predictions on.
+        y: (array) The true class labels.
+        
+        Returns:
+        The ratio of samples whose class was predicted correctly.
+        '''
+        
         return accuracy_score(y,self.predict(X));
 
 class KernelRidgeRegressor(BaseEstimator):
+    '''
+    KernelRidgeRegressor performs kernel regression with an l_2 penalty.
     
-    def __init__(self,rho=0.001,kernel='rbf',gamma=1.,degree=3,coef0=1.):
+    Arguments:
+    rho: (float) The value of the ridge regularizer.
+    kernel: (string) The type of kernel to be used. Currently 'linear', 'poly', 'rbf', 'laplacian', 'chi2', 
+    'additive_chi2' and 'sigmoid' are supported.
+    gamma: (float) The scale parameter of the kernel. Equals 1/sqrt(2 bandwidth^2) for kernels with a bandwidth parameter.
+    degree: (float) The degree for polynomial kernels.
+    coef0: (float) An additive parameter for 'poly' and 'sigmoid' kernels.
+    '''
+    
+    def __init__(self,rho=0.0001,kernel='rbf',gamma=1.,degree=3,coef0=1.):
         self.rho = rho;
         self.kernel = kernel;
         self.gamma = gamma;
@@ -65,6 +114,12 @@ class KernelRidgeRegressor(BaseEstimator):
         self.coef0 = coef0;
         
     def fit(self,X,y,solver='chol'):
+        '''
+        Arguments:
+        X: (array) The training data.
+        y: (array) The training labels.
+        '''
+        
         self.X = X;
         self.N = len(X);
         
@@ -86,20 +141,64 @@ class KernelRidgeRegressor(BaseEstimator):
         return self;
         
     def predict(self,X):
+        '''
+        Arguments:
+        X: (array) The test data to perform predictions on.
+        
+        Returns:
+        An array storing the predictions.
+        '''
+        
         K = get_kernel_matrix(X,self.X,self.kernel,self.gamma,self.degree,self.coef0)
         predictions = np.dot(K,self.dual_coef_.T)+self.intercept_;
         return predictions;
     
     def score(self,X,y):
+        '''
+        Arguments:
+        X: (array) The test data to perform predictions on.
+        y: (array) The correct predictions.
+        
+        Returns:
+        The R-Squared value, i.e., the explained variance.
+        '''
+        
         residual_sum = np.sum((y-self.predict(X))**2);
         total_sum = np.sum((y-np.mean(y,axis=0))**2);
         return 1. - residual_sum/total_sum;
         
     def rmse_score(self,X,y):
+        '''
+        Arguments:
+        X: (array) The test data to perform predictions on.
+        y: (array) The correct predictions.
+        
+        Returns:
+        The Root Mean Squared Error (RMSE) value.
+        '''
+        
         return np.sqrt(np.mean((y-self.predict(X))**2));
     
 def NystromRidgeRegressor(X,y,X_rep,rho=1e-4,kernel = 'rbf',gamma = 0.01,degree = 3,
                           coef0 = 1,normalize=False,rcond = None):
+    '''
+    NystromRidgeRegressor uses a representative set of samples to compute the corresponding dual coefficients and
+    intercept term directly, when a Ridge Regressor is trained on the Nystrom kernel features.
+    
+    Arguments:
+    X: (array) The training data.
+    y: (array) The training labels.
+    X_rep: (array) The representative data points.
+    rho: (float) The value of the ridge regularizer.
+    kernel: (string) The type of kernel to be used. Currently 'linear', 'poly', 'rbf', 'laplacian', 'chi2', 
+    'additive_chi2' and 'sigmoid' are supported.
+    gamma: (float) The scale parameter of the kernel. Equals 1/sqrt(2 bandwidth^2) for kernels with a bandwidth parameter.
+    degree: (float) The degree for polynomial kernels.
+    coef0: (float) An additive parameter for 'poly' and 'sigmoid' kernels.
+    normalize: (bool) Whether the columns of y should be scaled to be unit norm. This makes the regression produce an optimal 
+    Kernel Discriminant Analysis Solution.
+    rcond: The condition number to be imposed on the kernel matrix, used to determine rank.
+    '''
     
     if normalize:
         yn = y/np.norm(y,axis=0);
