@@ -127,9 +127,26 @@ class TFClassifier(BaseEstimator):
         sess.close();
         
     def predict(self,X):
+        '''
+        Arguments:
+        X: (array) The data to perform predictions on.
+        
+        Returns:
+        An array storing the class predictions before thresholding or argmax.
+        '''
+        
         return np.dot(X,self.coef_.T)+self.intercept_
         
     def score(self,X,y):
+        '''
+        Arguments:
+        X: (array) The test data to perform predictions on.
+        y: (array) The true class labels.
+        
+        Returns:
+        The ratio of samples whose class was predicted correctly.
+        '''
+        
         if len(self.intercept_) > 1:
             return np.mean(np.argmax(y,axis=1)==np.argmax(self.predict(X),axis=1))
         else:
@@ -193,11 +210,28 @@ class TFNystromClassifier(BaseEstimator):
         return
         
     def predict(self,X):
+        '''
+        Arguments:
+        X: (array) The data to perform predictions on.
+        
+        Returns:
+        An array storing the class predictions before thresholding or argmax.
+        '''
+        
         Ktest = get_kernel_matrix(X,self._Xrep,self.kernel,self.gamma,
                                   self.degree,self.coef0);
         return np.dot(Ktest,self.dual_coef_.T)+self.intercept_;
 
     def score(self,X,y):
+        '''
+        Arguments:
+        X: (array) The test data to perform predictions on.
+        y: (array) The true class labels.
+        
+        Returns:
+        The ratio of samples whose class was predicted correctly.
+        '''
+        
         return np.mean(np.argmax(y,axis=1)==np.argmax(self.predict(X),axis=1))
         
 def get_kernel_matrix(X1,X2=None,kernel='rbf',gamma = 1,degree = 3,coef0=1):
