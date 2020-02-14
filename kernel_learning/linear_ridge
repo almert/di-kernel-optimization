@@ -67,3 +67,36 @@ class RidgeRegressor(BaseEstimator):
     def rmse_score(self,X,y):
         return np.sqrt(np.mean((y-self.predict(X))**2));
 
+class Binary(BaseEstimator):
+    def __init__(self,rho=None):
+        self.rho = rho;
+        
+    def fit(self,X,y):
+        self.classes_ = np.unique(y);
+        if len(self.classes_) != 2:
+            print('This class only supports binary classification!');
+            return self;
+        mu = X.mean(axis=0);
+        Xbar = X-mu;
+        Sbar = np.dot(Xbar.T,Xbar);
+        np.fill_diagonal(Sbar, Sbar.diagonal()+self.rho);
+        
+        Nc = [];
+        Idx = np.argwhere(y==self.classes_[0]).squeeze();
+        Nc.append(len(Idx));
+        Sbh = -np.sum(Xbar[Idx,:],axis=0);
+        Idx = np.argwhere(y==self.classes_[1]).squeeze();
+        Nc.append(len(Idx));
+        Sbh += np.sum(Xbar[Idx,:],axis=0);
+        
+        self.coef_ = solve(Sbar,Sbh,sym_pos=True,overwrite_a=True,overwrite_b=True);
+        self.intercept_ = (Nc[1]-Nc[0])/len(X)-np.dot(self.coef_,mu);
+        return self;
+
+    def predict(self,X):
+        scores = np.dot(X,self.coef_)+self.intercept_;
+        predictions = self.classes_[(scores>0).astype(int)];
+        return predictions;
+        
+    def score(self,X,y):
+        return accuracy_score(y,self.predict(X));
