@@ -16,6 +16,27 @@ from sklearn.svm import LinearSVC
 from linear_ridge import Binary, RidgeClassifier, RidgeRegressor
 
 class Nystrom(BaseEstimator):
+    '''
+    Nystrom produces a low-dimensional kernel feature mapping via the Nystrom approximation method.
+    
+    Arguments:
+    kernel: (string) The type of kernel to be used. Currently 'linear', 'poly', 'rbf', 'laplacian', 'chi2', 
+    'additive_chi2' and 'sigmoid' are supported.
+    gamma: (float) The scale parameter of the kernel. Equals 1/sqrt(2 bandwidth^2) for kernels with a bandwidth parameter.
+    degree: (float) The degree for polynomial kernels.
+    coef0: (float) An additive parameter for 'poly' and 'sigmoid' kernels.
+    n: (int) Number of random data samples used to produce a Nystrom approximation. If n=len(X), no approximation takes place
+    and the full-dimensional kernel mapping is computed.
+    k: (int) Number of subspace dimensions used. If k=n, the full kernel feature space is used.
+    approx: (string) Whether Standard Nystrom ('Nys') or K-Means Nystrom ('KNys') approximation is used.
+    kmeans_params: (dict) A dictionary containing the k-means parameters. Only used if approx='KNys'.
+    kmeans_N: (int) The maximum number of samples to perform K-Means clustering with.
+    rand_svd: (bool) Whether to use randomized SVD to obtain the Nystrom kernel approximation. Can result in speed up when k is
+    much smaller than n.
+    over_sampling: The over_sampling parameter for randomized SVD.
+    power: The power parameter for randomized SVD.
+    '''
+    
     def __init__(self,kernel='rbf',gamma=1.,degree=3,coef0=1.,n=None,k=None,
                  approx='Nys',kmeans_params=None,kmeans_N=20000,rand_svd=False,
                  over_sampling=10,power=2):
@@ -33,6 +54,13 @@ class Nystrom(BaseEstimator):
         self.power = power;
         
     def fit(self,X,rcond=None,seed=None):
+        '''
+        Arguments:
+        X: (array) The training data.
+        rcond: (float) The condition number to be imposed on the kernel matrix.
+        seed: (float) The seed to control randomization.
+        '''
+        
         self.N = len(X);
         self._Xrep = None;
         if seed is not None:
@@ -78,12 +106,41 @@ class Nystrom(BaseEstimator):
         self.A = Kvec*(1./np.sqrt(Keig));
     
     def transform(self,X):
+        '''
+        Arguments:
+        X: (array) The data to apply the kernel mapping to.
+        
+        Returns:
+        An array representing the kernel mapping applied to X.
+        '''
+       
         Ktest = get_kernel_matrix(X,self._Xrep,self.kernel,self.gamma,
                                         self.degree,self.coef0);
         Phi = np.dot(Ktest,self.A);
         return Phi;
 
 class EnsembleNystrom(BaseEstimator):
+    '''
+    EnsembleNystrom produces a low-dimensional kernel feature mapping by combining smaller scale Nystrom mappings.
+    
+    Arguments:
+    kernel: (string) The type of kernel to be used. Currently 'linear', 'poly', 'rbf', 'laplacian', 'chi2', 
+    'additive_chi2' and 'sigmoid' are supported.
+    gamma: (float) The scale parameter of the kernel. Equals 1/sqrt(2 bandwidth^2) for kernels with a bandwidth parameter.
+    degree: (float) The degree for polynomial kernels.
+    coef0: (float) An additive parameter for 'poly' and 'sigmoid' kernels.
+    n: (int) Number of random data samples used to produce each Nystrom approximation. If n=len(X), no approximation takes place
+    and the full-dimensional kernel mapping is computed.
+    k: (int) Number of subspace dimensions used in individual Nystrom mappings. If k=n, the full kernel feature space is used.
+    p: (int) Number of Nystrom feature maps to be combined.
+    weights: (string) The weighting scheme for the Nystrom maps. Currently, only 'uniform' is supported. Alternatively a regression
+    could be fitted on a hold-out sample to optimize the weights.
+    rand_svd: (bool) Whether to use randomized SVD to obtain the Nystrom kernel approximation. Can result in speed up when k is
+    much smaller than n.
+    over_sampling: The over_sampling parameter for randomized SVD.
+    power: The power parameter for randomized SVD.
+    '''
+    
     def __init__(self,kernel='rbf',gamma=1.,degree=3,coef0=1.,n=None,k=None,p=1,
                  weights='uniform',rand_svd=False,over_sampling=10,power=2):
         self.kernel = kernel;
