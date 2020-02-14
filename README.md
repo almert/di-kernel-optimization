@@ -1,4 +1,4 @@
-# DI Kernel Optimization
+# Discriminant Information Based Kernel Optimization
 ### Python codes for optimizing kernel mappings based on the Discriminant Information criterion
 
 ## Overview
