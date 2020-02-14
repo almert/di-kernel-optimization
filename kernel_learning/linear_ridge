@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec 18 15:13:31 2018
+
+@author: merta
+"""
+
+import numpy as np
+from scipy.linalg import solve
+from sklearn.base import BaseEstimator
+from sklearn.metrics import accuracy_score
+
+class RidgeClassifier(BaseEstimator):
+    def __init__(self,rho=None):
+        self.rho = rho;
+        
+    def fit(self,X,y):
+        self.classes_ = np.unique(y);
+        mu = X.mean(axis=0);
+        Xbar = X-mu;
+        Sbar = np.dot(Xbar.T,Xbar);
+        np.fill_diagonal(Sbar, Sbar.diagonal()+self.rho);
+        
+        Nc = np.zeros((len(self.classes_)));
+        Sbh = np.zeros([Sbar.shape[0],len(self.classes_)]);
+        for i in range(len(self.classes_)):
+            ssIdx = np.argwhere(y==self.classes_[i]).squeeze();
+            Nc[i] = len(ssIdx);
+            Sbh[:,i] += np.sum(Xbar[ssIdx,:],axis=0);
+        
+        self.coef_ = solve(Sbar,Sbh,sym_pos=True,overwrite_a=True,overwrite_b=True).T;
+        self.intercept_ = Nc/len(X)-np.dot(self.coef_,mu);
+        return self;
+
+    def predict(self,X):
+        scores = np.dot(X,self.coef_.T)+self.intercept_;
+        predictions = self.classes_[np.argmax(scores,axis=1)];
+        return predictions;
+        
+    def score(self,X,y):
+        return accuracy_score(y,self.predict(X));
+
+class RidgeRegressor(BaseEstimator):
+    def __init__(self,rho=None):
+        self.rho = rho;
+        
+    def fit(self,X,y):
+        mu = X.mean(axis=0);
+        Xbar = X-mu;
+        Sbar = np.dot(Xbar.T,Xbar);
+        np.fill_diagonal(Sbar, Sbar.diagonal()+self.rho);
+                
+        self.coef_ = solve(Sbar,np.dot(Xbar.T,y),sym_pos=True,overwrite_a=True,overwrite_b=True).T;
+        self.intercept_ = np.mean(y,axis=0)-np.dot(self.coef_,mu);
+        return self;
+
+    def predict(self,X):
+        predictions = np.dot(X,self.coef_.T)+self.intercept_;
+        return predictions;
+        
+    def score(self,X,y):
+        residual_sum = np.sum((y-self.predict(X))**2);
+        total_sum = np.sum((y-np.mean(y,axis=0))**2);
+        return 1. - residual_sum/total_sum;
+        
+    def rmse_score(self,X,y):
+        return np.sqrt(np.mean((y-self.predict(X))**2));
+
