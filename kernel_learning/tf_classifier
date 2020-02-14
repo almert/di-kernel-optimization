@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Mar  4 12:01:32 2019
-
-@author: merta
+@author: almert
 """
-## TODO: Code documentation
 
 from numbers import Number
 import numpy as np
