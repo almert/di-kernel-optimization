@@ -10,6 +10,6 @@ nystrom: Utilizes numpy and scipy libraries to produce multiple variants of Nyst
 
 random_fourier: Utilizes numpy and scipy libraries to produce Random Fourier approximations.
 
-linear_ridge: Utilizes numpy and scipy libraries to train l_2 regularized least squares predictors.
+linear_ridge: Utilizes numpy and scipy libraries to train Ridge Regression predictors.
 
 kernel_ridge: Utilizes numpy and scipy libraries to train Kernel Ridge Regression predictors.
