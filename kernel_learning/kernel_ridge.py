@@ -183,7 +183,7 @@ def NystromRidgeRegressor(X,y,X_rep,rho=1e-4,kernel = 'rbf',gamma = 0.01,degree 
                           coef0 = 1,normalize=False,rcond = None):
     '''
     NystromRidgeRegressor uses a representative set of samples to compute the corresponding dual coefficients and
-    intercept term directly, when a Ridge Regressor is trained on the Nystrom kernel features.
+    the intercept term directly, when a Ridge Regressor is trained on the Nystrom kernel features.
     
     Arguments:
     X: (array) The training data.
