@@ -45,19 +45,19 @@ class KernelLayer():
         elif self.kernel == 'laplacian':
             self.kernel_func = tf_kernel.LaplacianKernel(1./self.gamma)
         
-    def initialize(self,Xtr,dtype=tf.float64,x_trainable=True,w_trainable=True):
+    def initialize(self,X,dtype=tf.float64,x_trainable=True,w_trainable=True):
         '''
         Arguments:   
-        Xtr: (array) The training data from which n landmark samples are selected to create a kernel mapping.
+        X: (array) The training data from which n landmark samples are selected to create a kernel mapping.
         dtype: (object) The tensorflow data type.
         x_trainable: (bool) Whether the landmark samples trainable or not.
         w_trainable: (bool) Whether the projection matrix is trainable or not.
         '''
         
-        assert isinstance(Xtr, np.ndarray) and Xtr.ndim == 2
+        assert isinstance(X, np.ndarray) and X.ndim == 2
         assert isinstance(x_trainable,bool) and isinstance(w_trainable,bool)
 
-        X_set = Xtr[np.random.permutation(len(Xtr))[:self.n]]
+        X_set = X[np.random.permutation(len(X))[:self.n]]
         mapper = LocalNystrom(kernel=self.kernel,gamma=self.gamma)
         mapper.fit(X_set,k=self.k)
         
@@ -104,7 +104,7 @@ class SubspaceKDI():
         elif self.kernel == 'laplacian':
             self.kernel_func = tf_kernel.LaplacianKernel(1./self.gamma)
             
-    def initialize(self,Xtr,dtype=tf.float64,x_trainable=True):
+    def initialize(self,X,dtype=tf.float64,x_trainable=True):
         '''
         Arguments:        
         X: (array) The training data from which n landmark samples are selected to initialize the kernel mapping.
@@ -113,10 +113,10 @@ class SubspaceKDI():
         kernel map via KDI.
         '''
         
-        assert isinstance(Xtr, np.ndarray) and Xtr.ndim == 2
+        assert isinstance(X, np.ndarray) and X.ndim == 2
         assert isinstance(x_trainable,bool)
 
-        X_set = Xtr[np.random.permutation(len(Xtr))[:self.n]]        
+        X_set = X[np.random.permutation(len(X))[:self.n]]        
         self.X_rep = tf.Variable(X_set,dtype=dtype,trainable=x_trainable)
         self.K_rep = self.kernel_func(self.X_rep)
         
@@ -181,11 +181,11 @@ class RandomFourierLayer():
         self.kernel = kernel
         self.gamma = gamma
         
-    def initialize(self,Xtr,dtype=tf.float64,W_init=None,b_init=None,
+    def initialize(self,X,dtype=tf.float64,W_init=None,b_init=None,
                    w_trainable=True,b_trainable=True):
                 '''
         Arguments: 
-        Xtr: (array) The training data, only the number of columns is used to produce the kernel mapping.
+        X: (array) The training data, only the number of columns is used to produce the kernel mapping.
         dtype: (object) The tensorflow data type.
         W_init: (array) The initial value of the projection matrix. If None, initialization is done randomly 
         based on the chosen kernel.
@@ -195,10 +195,10 @@ class RandomFourierLayer():
         b_trainable: (bool) Whether the bias vector is trainable or not.
         '''        
         
-        assert isinstance(Xtr, np.ndarray) and Xtr.ndim == 2
+        assert isinstance(X, np.ndarray) and X.ndim == 2
         assert isinstance(w_trainable,bool) and isinstance(b_trainable,bool)
 
-        m = np.shape(Xtr)[1];
+        m = np.shape(X)[1];
 
         if W_init is None:
             if self.kernel == 'rbf':
