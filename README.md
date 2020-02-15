@@ -12,7 +12,7 @@ The main functionality can be found within tf_kernel.py and tf_kernel_network.py
 Please cite [[1](#citation)] in your work when using these codes in your experiments.
 
 ## Dependencies
-The .py files that don't start with "tf" should be compatible with all versions of scikit-learn and numpy that come with Python 3.5 or 3.6. The tensorflow-specific parts of the code were tested on tensorflow 1.12.0. To make them compatible with the most recent versions of tensorflow, replace "import tensorflow as tf" with "import tensorflow.compat.v1 as tf" and add the command "tf.compat.v1.disable_eager_execution()" to your code. 
+The .py files that don't start with "tf" should be compatible with all versions of scikit-learn and numpy that come with Python 3.5 or 3.6. The tensorflow-specific parts of the code were tested on tensorflow 1.12.0. To make them compatible with the most recent versions of tensorflow, replace "import tensorflow as tf" with "import tensorflow.compat.v1 as tf" and add the command "tf.disable_eager_execution()" to the code. 
 
 ## License
 Princeton University
