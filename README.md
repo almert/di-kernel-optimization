@@ -7,7 +7,7 @@ This project contains the Python codes for optimizing Nystrom and Random Fourier
 ## Usage
 The code can be used to apply Random Fourier and Nystrom kernel feature maps on the data, as well as to optimize such feature maps for particular supervised learning tasks. 
 
-The main functionality can be found within tf_kernel.py and tf_kernel_network.py files. The other files can be used to create kernel feature maps and kernel based predictors. Files, whose names start with "tf", are useful for producing feature maps and training objectives compatible with tensorflow.
+The main functionality can be found within tf_kernel.py and tf_kernel_network.py files. The other files can be used to create kernel feature maps and kernel based predictors. Files, whose names start with "tf", are useful for producing feature maps, training objectives and predictors compatible with tensorflow. For more information, please refer to the code overview and code documentation.
 
 Please cite [[1](#citation)] in your work when using these codes in your experiments.
 
