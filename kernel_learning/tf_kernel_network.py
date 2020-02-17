@@ -183,7 +183,7 @@ class RandomFourierLayer():
         
     def initialize(self,X,dtype=tf.float64,W_init=None,b_init=None,
                    w_trainable=True,b_trainable=True):
-                '''
+        '''
         Arguments: 
         X: (array) The training data, only the number of columns is used to produce the kernel mapping.
         dtype: (object) The tensorflow data type.
