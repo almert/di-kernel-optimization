@@ -14,4 +14,4 @@ linear_ridge: Utilizes numpy and scipy libraries to train Ridge Regression predi
 
 kernel_ridge: Utilizes numpy and scipy libraries to train Kernel Ridge Regression predictors.
 
-You may find example code to optimize Nystrom and Random Fourier feature maps in the "examples" folder. Note that the example codes use fixed learning rate rules, though adaptive learning rates were used in our experiments. Adaptive learning rates can be implemented by keeping track of the objective values, which the example code already does.
+You may find example code to optimize Nystrom and Random Fourier feature maps in the "examples" folder. Note that the example codes use fixed learning rate rules, though adaptive learning rates were used in our experiments. Adaptive learning rates can be implemented by keeping track of the objective values, which the example codes already do.
