@@ -9,10 +9,9 @@ sys.path.append('..')
 import numpy as np
 import tensorflow as tf
 import scipy.io as sio
-from operator import itemgetter
 from tf_kernel_network import SubspaceKDI
 from nystrom import Nystrom
-from sklearn.preprocessing import LabelBinarizer, MinMaxScaler
+from sklearn.preprocessing import LabelBinarizer
 from tf_classifier import TFClassifier
 
 n_dims = [100,500,1000]
