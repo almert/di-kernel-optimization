@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Feb 19 09:49:26 2019
-
-@author: merta
+@author: almert
 """
 
 import sys
@@ -11,7 +9,6 @@ sys.path.append('..')
 import numpy as np
 import tensorflow as tf
 from tf_kernel_network import RandomFourierLayer, DI
-from nystrom import Nystrom
 from sklearn.preprocessing import LabelBinarizer
 from tf_classifier import TFClassifier
 
@@ -22,6 +19,7 @@ learning_rate = 0.001
 gamma = 0.01
 
 def load_mnist():
+    # Replace this part with your own to load from your local directory.
     (Xtr, ytr), (Xte, yte) = tf.keras.datasets.mnist.load_data()
     lb = LabelBinarizer()
     ytr = lb.fit_transform(ytr)
