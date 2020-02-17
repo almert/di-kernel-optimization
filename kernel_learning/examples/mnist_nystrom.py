@@ -8,7 +8,6 @@ import sys
 sys.path.append('..')
 import numpy as np
 import tensorflow as tf
-import scipy.io as sio
 from tf_kernel_network import SubspaceKDI
 from nystrom import Nystrom
 from sklearn.preprocessing import LabelBinarizer
@@ -21,6 +20,7 @@ learning_rate = 0.001
 gamma = 0.01
 
 def load_mnist():
+    # Replace this part with your own to load from your local directory.
     (Xtr, ytr), (Xte, yte) = tf.keras.datasets.mnist.load_data()
     lb = LabelBinarizer()
     ytr = lb.fit_transform(ytr)
